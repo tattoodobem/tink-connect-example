@@ -11,7 +11,7 @@ const AuthorizationLink = ({
   const ssnData = ssn ? ('&input_username=' + ssn) : '';
   const link = 'https://oauth.tink.com/0.4/authorize/?' +
     'client_id=' + process.env.REACT_APP_CLIENT_ID +
-    '&redirect_uri=process.env.REACT_APP_CALLBACK_URL' +
+    '&redirect_uri=' + process.env.REACT_APP_CALLBACK_URL +
     '&scope=' + scope +
     ssnData +
     '&grant_type=authorization_code' +
