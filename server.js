@@ -4,17 +4,40 @@ const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const path = require('path');
 const fetch = require('node-fetch');
-
 const CLIENT_ID = process.env.REACT_APP_CLIENT_ID;
 const CLIENT_SECRET = process.env.REACT_APP_CLIENT_SECRET;
 
+// need cookieParser middleware before we can do anything with cookies
 
 app.use(cookieParser());
 
+// set a cookie
+app.use(function (req, res, next) {
+  // check if client sent cookie
+  var cookie = req.cookies.cookieName;
+  if (cookie === undefined)
+  {
+    // no: set a new cookie
+    var randomNumber=Math.random().toString();
+    randomNumber=randomNumber.substring(2,randomNumber.length);
+    res.cookie('cookieName',randomNumber, { maxAge: 900000, httpOnly: true });
+    console.log('cookie created successfully');
+  } 
+  else
+  {
+    // yes, cookie was already present 
+    console.log('cookie exists', cookie);
+  } 
+  next(); // <-- important!
+});
+
+// let static middleware do its job
 app.use(express.static(path.join(__dirname, 'client/build')));
 app.use(bodyParser.json());
 
 app.post('/bot', (req, res) => {
+  console.log(req.body)
+
   res.send({
     replies: [{
       type: 'text',
@@ -24,6 +47,11 @@ app.post('/bot', (req, res) => {
       memory: { key: 'value' }
     }
   })
+})
+
+app.post('/errors', (req, res) => {
+  console.log(req.body)
+  res.send()
 })
 // Needed to make client-side routing work in production.
 app.get('/*', function (req, res) {
