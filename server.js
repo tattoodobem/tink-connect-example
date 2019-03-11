@@ -1,34 +1,65 @@
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
 const path = require('path');
 const fetch = require('node-fetch');
 
 const CLIENT_ID = process.env.REACT_APP_CLIENT_ID;
 const CLIENT_SECRET = process.env.REACT_APP_CLIENT_SECRET;
 
+
+app.use(cookieParser());
+
 app.use(express.static(path.join(__dirname, 'client/build')));
 app.use(bodyParser.json());
 
+app.post('/bot', (req, res) => {
+  res.send({
+    replies: [{
+      type: 'text',
+      content: 'Roger that',
+    }],
+    conversation: {
+      memory: { key: 'value' }
+    }
+  })
+})
 // Needed to make client-side routing work in production.
 app.get('/*', function (req, res) {
   res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
 });
 
-const base = 'https://api.tink.se/api/v1';
-
 // This is the server API, where the client can post a received OAuth code.
 app.post('/callback', function (req, res) {
-  getAccessToken(req.body.code).then(function (response) {
+  var cookie = req.cookies.tinkTestToken;
+  if (cookie === undefined){
+  console.log("no cookie");
+    getAccessToken(req.body.code, cookie).then(function (response) {
+	 
+	var hours = 8;
+	var date = new Date();
+	date.setTime(date.getTime()+(hours*60*60*1000));
 
+	res.cookie('tinkTestToken',response.access_token, { maxAge: date, httpOnly: true });
+	console.log('cookie created successfully');
+	
     getData(response.access_token).then(function (response) {
       res.send(JSON.stringify({response: response}));
     }).catch(err => console.log(err));
 
   }).catch(err => console.log(err));
+  }
+  else{
+      getData(cookie).then(function (response) {
+      res.send(JSON.stringify({response: response}));
+    }).catch(err => console.log(err));
+  }
+
 });
 
 async function getData(accessToken) {
+const searchResponse = await getSearchData(accessToken);
   const categoryResponse = await getCategoryData(accessToken);
   const userResponse = await getUserData(accessToken);
   const accountResponse = await getAccountData(accessToken);
@@ -36,6 +67,7 @@ async function getData(accessToken) {
   const transactionResponse = await getTransactionData(accessToken);
 
   return {
+  searchData: searchResponse,
     categoryData: categoryResponse,
     userData: userResponse,
     accountData: accountResponse,
@@ -44,7 +76,7 @@ async function getData(accessToken) {
   };
 }
 
-async function getAccessToken(code) {
+async function getAccessToken(code, cookie) {
   const body = {
     code: code,
     client_id: CLIENT_ID, // Your OAuth client identifier.
@@ -120,7 +152,41 @@ async function getTransactionData(token) {
   }
   return response.json();
 }
+async function getSearchData(token) {
+  const response = await fetch(base + '/search', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + token,
+    },
+    body: JSON.stringify({queryString: "Food"}),
+  });
 
+  if (response.status !== 200) {
+    throw Error(response.status);
+  }
+  return response.json();
+/*
+  const response = await fetch(base + '/statistics/query', {
+  method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + token,
+    },
+	body: JSON.stringify({periods: ["2018-12"]}),
+	/*
+	{"periods": [
+    "2018-12-1",
+    "2018-12-31"
+  ]}
+	
+  });
+*/
+  if (response.status !== 200) {
+    throw Error(response.status);
+  }
+  return response.json();
+}
 async function getCategoryData(token) {
   const response = await fetch(base + '/categories', {
     headers: {
@@ -143,7 +209,7 @@ if (!CLIENT_SECRET) {
 }
 
 // Start the server.
-const port =  process.env.PORT || 8080;
+const port = process.env.PORT || 8080;
 app.listen(port, function () {
   console.log('Tink example app listening on port ' + port);
 });
