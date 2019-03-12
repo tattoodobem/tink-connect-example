@@ -153,6 +153,7 @@ console.log("getaccesstoken:" + code )
 
   if (response.status !== 200) {
     throw Error(response.status);
+	  console.log(response);
   }
   return response.json();
 }
