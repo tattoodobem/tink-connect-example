@@ -42,7 +42,7 @@ app.post('/bot', (req, res) => {
   response.conversation = {
       memory: { key: 'value' }
     };
-      res.send(JSON.stringify({response: response}));
+      res.send(JSON.stringify(response));
     }).catch(err => console.log(err));
 });
 
