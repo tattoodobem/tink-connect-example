@@ -224,6 +224,8 @@ async function getSearchData(token) {
   });
 
   if (response.status !== 200) {
+	    console.log(response);
+  console.log(response).message;
     throw Error(response.status);
   }
   return response.json();
