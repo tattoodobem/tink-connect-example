@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const path = require('path');
 const fetch = require('node-fetch');
+require('dotenv').config({ path: "/node/tink-connect-example-master/.env" });
 const CLIENT_ID = process.env.REACT_APP_CLIENT_ID;
 const CLIENT_SECRET = process.env.REACT_APP_CLIENT_SECRET;
 
@@ -11,48 +12,45 @@ const CLIENT_SECRET = process.env.REACT_APP_CLIENT_SECRET;
 
 app.use(cookieParser());
 
-// set a cookie
-app.use(function (req, res, next) {
-  // check if client sent cookie
-  var cookie = req.cookies.cookieName;
-  if (cookie === undefined)
-  {
-    // no: set a new cookie
-    var randomNumber=Math.random().toString();
-    randomNumber=randomNumber.substring(2,randomNumber.length);
-    res.cookie('cookieName',randomNumber, { maxAge: 900000, httpOnly: true });
-    console.log('cookie created successfully');
-  } 
-  else
-  {
-    // yes, cookie was already present 
-    console.log('cookie exists', cookie);
-  } 
-  next(); // <-- important!
-});
-
 // let static middleware do its job
 app.use(express.static(path.join(__dirname, 'client/build')));
 app.use(bodyParser.json());
 
 app.post('/bot', (req, res) => {
-  console.log(req.body)
-
-  res.send({
-    replies: [{
-      type: 'text',
-      content: 'Roger that',
-    }],
-    conversation: {
+  console.log(req.body.conversation.memory.token);
+  getData(req.body.conversation.memory.token).then(function (response) {
+	const transactions = response.searchData.results.map(result => {
+		const transaction = result.transaction;
+		const category = response.categoryData.find(category => category.id === transaction.categoryId);
+		return (
+			{
+				transactionId:transaction.id,
+				transactionDate:transaction.date,
+				transactionDescription:transaction.description,
+				transactionAmount:transaction.amount,
+				categoryPrimaryName:category.primaryName
+		   }
+		);
+    });
+  	var replies = [];
+	for(i=0;i<transactions.length;i++){
+		replies[i] = {};
+		replies[i].type='text';
+		replies[i].content=transactions[i].transactionDescription;
+	}
+  var response = {};
+  response.replies = replies;
+  response.conversation = {
       memory: { key: 'value' }
-    }
-  })
-})
+    };
+      res.send(JSON.stringify({response: response}));
+    }).catch(err => console.log(err));
+});
 
 app.post('/errors', (req, res) => {
   console.log(req.body)
   res.send()
-})
+});
 // Needed to make client-side routing work in production.
 app.get('/*', function (req, res) {
   res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
@@ -60,12 +58,14 @@ app.get('/*', function (req, res) {
 
 const base = 'https://api.tink.se/api/v1';
 
-// This is the server API, where the client can post a received OAuth code.
-app.post('/callback', function (req, res) {
+
+app.post('/botauth', function (req, res) {
   var cookie = req.cookies.tinkTestToken;
   if (cookie === undefined){
-  console.log("no cookie");
-    getAccessToken(req.body.code, cookie).then(function (response) {
+  console.log("botauth : no cookie");
+  console.log("token : " + req.body.code);
+  console.log(req.body); 
+    getAccessToken(req.body.code).then(function (response) {
 	 
 	var hours = 8;
 	var date = new Date();
@@ -73,6 +73,29 @@ app.post('/callback', function (req, res) {
 
 	res.cookie('tinkTestToken',response.access_token, { maxAge: date, httpOnly: true });
 	console.log('cookie created successfully');
+
+  }).catch(err => console.log(err));
+  }
+  else{
+  console.log("cookie set:" + cookie);
+  res.send(JSON.stringify({response: {cookie: cookie}}));
+  }
+
+});
+// This is the server API, where the client can post a received OAuth code.
+app.post('/callback', function (req, res) {
+  var cookie = req.cookies.tinkTestToken;
+  if (cookie === undefined){
+  console.log("callback no cookie");
+ 
+    getAccessToken(req.body.code).then(function (response) {
+	 
+	var hours = 8;
+	var date = new Date();
+	date.setTime(date.getTime()+(hours*60*60*1000));
+
+	res.cookie('tinkTestToken',response.access_token, { maxAge: date, httpOnly: true });
+	console.log('callback cookie created successfully');
 	
     getData(response.access_token).then(function (response) {
       res.send(JSON.stringify({response: response}));
@@ -105,8 +128,17 @@ const searchResponse = await getSearchData(accessToken);
     transactionData: transactionResponse,
   };
 }
+async function getBotData(accessToken) {
+const searchResponse = await getSearchData(accessToken);
+const categoryResponse = await getCategoryData(accessToken);
+  return {
+  searchData: searchResponse,
+  categoryData: categoryResponse
+};
+}
 
-async function getAccessToken(code, cookie) {
+async function getAccessToken(code) {
+console.log("getaccesstoken:" + code )
   const body = {
     code: code,
     client_id: CLIENT_ID, // Your OAuth client identifier.
