@@ -1,6 +1,7 @@
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 import Callback from './Callback';
+import BotAuth from './BotAuth';
 import { Col, Container, Row } from 'reactstrap';
 import Main from './Main';
 
@@ -21,6 +22,7 @@ const App = () => (
         <Switch>
           <Route exact path="/" component={Main} />
           <Route exact path="/callback" component={Callback} />
+		  <Route exact path="/botauth" component={BotAuth} />
         </Switch>
 
       </Col>
