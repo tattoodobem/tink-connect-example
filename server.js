@@ -48,7 +48,10 @@ for(i=0;i<transactions.length;i++){
 }
 replies[0].content = elements;
   var response = {};
-  response.replies = replies;
+  response.replies = [{
+			type: 'text',
+			content: "reply"
+		}];
   response.conversation = {
       memory: { token: req.body.conversation.memory.token }
     };
