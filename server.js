@@ -32,12 +32,19 @@ app.post('/bot', (req, res) => {
 		   }
 		);
     });
-  	var replies = [];
-	for(i=0;i<transactions.length;i++){
-		replies[i] = {};
-		replies[i].type='text';
-		replies[i].content=transactions[i].transactionDescription;
-	}
+var replies = [];
+replies[0] = {};
+replies[0].type='list';	
+var elements = [];
+for(i=0;i<transactions.length;i++){
+	elements[i]={
+            "title": transactions[i].transactionDescription,
+            "imageUrl": "",
+            "subtitle": transactions[i].transactionAmount,
+            "buttons": []
+          };
+}
+replies[0].content = elements;
   var response = {};
   response.replies = replies;
   response.conversation = {
