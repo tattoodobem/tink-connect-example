@@ -81,6 +81,7 @@ app.post('/botauth', function (req, res) {
 	date.setTime(date.getTime()+(hours*60*60*1000));
 
 	res.cookie('tinkTestToken',response.access_token, { maxAge: date, httpOnly: true });
+	res.send(JSON.stringify({response: {cookie: response.access_token}}));
 	console.log('cookie created successfully');
 
   }).catch(err => console.log(err));
