@@ -19,6 +19,7 @@ app.post('/bot', (req, res) => {
 	var conversation = req.body.conversation;
   console.log(conversation.memory.token);
   getBotData(conversation.memory.token, conversation.memory.categoria, conversation.memory.when).then(function (response) {
+	const currency = response.userData.profile.currency;
 	const transactions = response.searchData.results.map(result => {
 		const transaction = result.transaction;
 		const category = response.categoryData.find(category => category.id === transaction.categoryId);
@@ -41,7 +42,7 @@ for(i=0;i<transactions.length;i++){
 	elements[i]={
             "title": transactions[i].transactionDescription,
             "imageUrl": "",
-            "subtitle": transactions[i].transactionAmount,
+            "subtitle": String(transactions[i].transactionAmount) + " " + currency,
             "buttons": []
           };
 }
