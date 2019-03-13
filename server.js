@@ -141,9 +141,11 @@ const searchResponse = await getSearchData(accessToken);
 async function getBotData(accessToken, searchQuery) {
 const searchResponse = await getSearchData(accessToken, searchQuery);
 const categoryResponse = await getCategoryData(accessToken);
+	const userResponse = await getUserData(accessToken);
   return {
   searchData: searchResponse,
-  categoryData: categoryResponse
+  categoryData: categoryResponse,
+	   userData: userResponse
 };
 }
 
