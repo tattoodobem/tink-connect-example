@@ -17,7 +17,7 @@ app.use(bodyParser.json());
 
 app.post('/bot', (req, res) => {
   console.log(req.body.conversation.memory.token);
-  getData(req.body.conversation.memory.token).then(function (response) {
+  getBotData(req.body.conversation.memory.token, req.body.conversation.memory.categoria).then(function (response) {
 	const transactions = response.searchData.results.map(result => {
 		const transaction = result.transaction;
 		const category = response.categoryData.find(category => category.id === transaction.categoryId);
@@ -127,8 +127,8 @@ const searchResponse = await getSearchData(accessToken);
     transactionData: transactionResponse,
   };
 }
-async function getBotData(accessToken) {
-const searchResponse = await getSearchData(accessToken);
+async function getBotData(accessToken, searchQuery) {
+const searchResponse = await getSearchData(accessToken, searchQuery);
 const categoryResponse = await getCategoryData(accessToken);
   return {
   searchData: searchResponse,
