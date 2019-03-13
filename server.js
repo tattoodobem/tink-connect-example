@@ -35,6 +35,7 @@ app.post('/bot', (req, res) => {
 var replies = [];
 replies[0] = {};
 replies[0].type='list';	
+	  replies[0].delay=null;
 var elements = [];
 for(i=0;i<transactions.length;i++){
 	elements[i]={
