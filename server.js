@@ -51,9 +51,6 @@ replies[0].content.elements = elements;
 	  replies[0].content.buttons = [];
   var response = {};
   response.replies = replies;
-  response.conversation = {
-      memory: { token: req.body.conversation.memory.token }
-    };
       res.send(JSON.stringify(response));
     }).catch(err => console.log(err));
 });
