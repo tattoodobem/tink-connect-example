@@ -140,8 +140,8 @@ const searchResponse = await getSearchData(accessToken);
     transactionData: transactionResponse,
   };
 }
-async function getBotData(accessToken, searchQuery) {
-const searchResponse = await getSearchData(accessToken, searchQuery);
+async function getBotData(accessToken, categoria, when) {
+const searchResponse = await getSearchData(accessToken, categoria, when);
 const categoryResponse = await getCategoryData(accessToken);
 	const userResponse = await getUserData(accessToken);
   return {
