@@ -229,14 +229,14 @@ async function getTransactionData(token) {
   }
   return response.json();
 }
-async function getSearchData(token) {
+async function getSearchData(token, categoria, when) {
   const response = await fetch(base + '/search', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ' + token,
     },
-    body: JSON.stringify({queryString: "Food"}),
+    body: JSON.stringify({queryString: categoria + " " + when}),
   });
 
   if (response.status !== 200) {
