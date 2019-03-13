@@ -16,8 +16,9 @@ app.use(express.static(path.join(__dirname, 'client/build')));
 app.use(bodyParser.json());
 
 app.post('/bot', (req, res) => {
-  console.log(req.body.conversation.memory.token);
-  getBotData(req.body.conversation.memory.token, req.body.conversation.memory.categoria).then(function (response) {
+	var conversation = req.body.conversation;
+  console.log(conversation.memory.token);
+  getBotData(conversation.memory.token, conversation.memory.categoria, conversation.memory.when).then(function (response) {
 	const transactions = response.searchData.results.map(result => {
 		const transaction = result.transaction;
 		const category = response.categoryData.find(category => category.id === transaction.categoryId);
