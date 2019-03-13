@@ -42,11 +42,13 @@ for(i=0;i<transactions.length;i++){
 	elements[i]={
             "title": transactions[i].transactionDescription,
             "imageUrl": "",
-            "subtitle": "subtite",
+            "subtitle": String(transactions[i].transactionAmount) + " " + currency,
             "buttons": []
           };
 }
-replies[0].content = elements;
+	  replies[0].content = {};
+replies[0].content.elements = elements;
+	  replies[0].content.buttons = [];
   var response = {};
   response.replies = replies;
   response.conversation = {
