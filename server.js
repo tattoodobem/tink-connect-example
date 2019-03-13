@@ -240,7 +240,7 @@ async function getSearchData(token, categoria, when) {
   });
 
   if (response.status !== 200) {
-	console.log(JSON.stringify({queryString: categoria + " " + when}));
+	console.log(token);
     throw Error(response.status);
   }
   return response.json();
