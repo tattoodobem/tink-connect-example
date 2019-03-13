@@ -42,16 +42,13 @@ for(i=0;i<transactions.length;i++){
 	elements[i]={
             "title": transactions[i].transactionDescription,
             "imageUrl": "",
-            "subtitle": String(transactions[i].transactionAmount) + " " + currency,
+            "subtitle": "subtite",
             "buttons": []
           };
 }
 replies[0].content = elements;
   var response = {};
-  response.replies = [{
-			type: 'text',
-			content: "reply"
-		}];
+  response.replies = replies;
   response.conversation = {
       memory: { token: req.body.conversation.memory.token }
     };
