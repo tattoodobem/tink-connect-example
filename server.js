@@ -75,7 +75,7 @@ app.post('/botauth', function (req, res) {
   console.log(req.body); 
     getAccessToken(req.body.code).then(function (response) {
 	 
-	var hours = 8;
+	var hours = 2;
 	var date = new Date();
 	date.setTime(date.getTime()+(hours*60*60*1000));
 
